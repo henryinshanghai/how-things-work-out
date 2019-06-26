@@ -1,0 +1,231 @@
+problem:
+错误信息：
+Consistent: 
+org.openqa.selenium.WebDriverException: 
+org.apache.http.conn.HttpHostConnectException: 
+Connect to localhost:13956 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: 
+Connection refused: connect #4203
+
+codingbest于2017年6月20日开启此问题·16条评论
+
+元信息：
+操作系统：Windows 7
+Selenium版本：3.3.1
+浏览器：Chromedriver
+浏览器版本：版本59.0.3071.104（官方版本）（64位）
+
+预期行为 -  Chrome启动成功
+实际行为 -  org.openqa.selenium.WebDriverException：
+org.apache.http.conn.HttpHostConnectException：
+
+重现步骤 -
+org.openqa.selenium.WebDriverException: 
+org.apache.http.conn.HttpHostConnectException: 
+Connect to localhost:13956 [localhost/127.0.0.1,
+localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect
+
+Build info: version: '3.3.1', revision: '5234b325d5', time: '2017-03-10 09:10:29 +0000'
+System info: host: 
+'INCHEL-063',
+ip: '10.129.45.74', 
+os.name: 'Windows 7',
+os.arch: 'amd64', 
+os.version: '6.1', 
+java.version: '1.8.0_131'
+
+Driver info: driver.version: Driver
+at org.openqa.selenium.remote.service.DriverCommandExecutor.execute(DriverCommandExecutor.java:91)
+at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:604)
+
+===
+请提供简明可重复的测试用例，以便我们能够就此问题采取行动。请参阅CONTRIBUTING.md
+
+===
+运行多个测试用例时，我也收到此错误。
+设置：使用.NET绑定。
+Visual Studio 2017社区。
+Windows 10. Java 1.8.0_131
+NuGet.org的软件包版本：
+  Selenium.WebDriver：3.4.0
+  Selenium.WebDriver.ChromeDriver：2.30.0.1
+  NUnit：3.7.1
+  
+步骤：
+  创建两个应该使用使用ChromeDriver的NUnit标记传递的测试用例。
+  在Visual Studio Test Explorer窗口中，将两个测试作为同一运行的一部分运行（例如，使用“全部运行”按钮。“  
+
+预期结果：两个测试用例都通过了
+
+实际结果：第一个测试用例通过，但第二个测试用例失败，堆栈跟踪类似于：
+测试名称：
+  ViewAPIAppsNoneAssociated
+测试FullName：NWSAutomatedTests.APIVault.TestCases.APIVaultTests.ViewAPIAppsNoneAssociated
+测试源：C：\ Users \ Roger.Cook \ Code \ NICServices \ NWSAutomatedTests \ NWSAutomatedTests \ APIVault \ TestCases \ APIVaultTests.cs：第72行
+测试结果：失败
+测试持续时间：0：00：06.011
+
+===
+注意：这可能不是ChromeDriver特有的。
+我也从Selenium.WebDriver.GeckoDriver.Win64版本0.17.0获得类似的故障和堆栈跟踪。
+对于Firefox和Chrome，如果测试用例单独运行，它们都会通过。
+只有在尝试运行多个测试用例时才会出现故障。
+
+===
+重现的另一个注意事项：在两个测试用例中启动和关闭浏览器。
+
+===
+  在两个测试用例中启动并关闭浏览器。
+为什么你不能发布代码？
+
+===
+我最初复制此问题的代码是专有的。Gotta feed the kids somehow
+
+我在https://github.com/rogerdc/SeleniumIssue4203Repro2.git创建了一个存储库，
+它通过分别在Google和Bing上搜索“Cheese”和“Fromage”成功地重现了这个问题。
+===
+你确定这些测试是按顺序执行而不是并行执行吗？
+===
+它们按照我在VS Test Explorer窗口中看到的顺序执行。一个进入运行状态，然后在另一个进入运行状态之前被标记为已通过。
+===
+从这之中得到了一个堆栈跟踪？
+因为您之前测试中显示的那个看起来像执行是交错的。
+所以第一种情况运行它的TearDown，并关闭所有浏览器实例.
+当第二种情况调用TearDown时，驱动程序已经消失。
+===
+TearDown : OpenQA.Selenium.WebDriverException : A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:54785/session//window. The status of the exception was ConnectFailure, and the message was: Unable to connect to the remote server
+  ----> System.Net.WebException : Unable to connect to the remote server
+  ----> System.Net.Sockets.SocketException : No connection could be made because the target machine actively refused it 127.0.0.1:54785
+-------结束跟踪------
+如果他们正在交错运行，他们不应该。
+我认为NUnit会做到这一点，这样他们就不会互相攻击。
+
+===
+我也正在用FF时，也面临着这个问题，请在下面找到详细信息
+Firefox版本：56.0（32位）
+Geko驱动程序：geckodriver-v0.19.0-win64
+Webdriver版本：selenium-server-standalone-3.6.0
+代码如下：
+package openBrow;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+public class Launch {
+
+//public static void main(String[] args) {
+	// TODO Auto-generated method stub
+
+	@Test
+	public void launchBrow(){
+		
+	System.setProperty("webdriver.gecko.driver", "D:/Test Projects/ActiTime/src/drivers/geckodriver-v0.19.0-win64/geckodriver.exe");
+	WebDriver driv = new FirefoxDriver();
+	driv.get("http://localhost/login.do/");
+	
+	driv.findElement(By.id("username")).sendKeys("manager");
+	driv.findElement(By.name("pwd")).sendKeys("admin");
+	}
+}
+
+错误日志信息：
+FAILED: launchBrow
+org.openqa.selenium.WebDriverException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:18452 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect
+Build info: version: '3.6.0', revision: '6fbf3ec767', time: '2017-09-27T16:15:40.131Z'
+System info: host: 'HARISH-CCS', ip: '172.20.10.9', os.name: 'Windows 7', os.arch: 'x86', os.version: '6.1', java.version: '1.8.0_92'
+Driver info: driver.version: FirefoxDriver
+
+默认测试测试运行：1，失败：1，跳过：0
+----
+默认套件总测试运行：1，失败：1，跳过：0
+[TestNG] org.testng.reporters.SuiteHTMLReporter@14751b3所花费的时间：108毫秒
+[TestNG] org.testng.reporters.EmailableReporter2@d2d9cb所花费的时间：9毫秒
+[TestNG] org.testng.reporters.jq.Main@1909a3所花费的时间：163毫秒
+[TestNG] [FailedReporter传递= 0失败= 0跳过= 0]所花费的时间：10毫秒
+[TestNG] org.testng.reporters.XMLReporter@19b00e0所花费的时间：8毫秒
+[TestNG] org.testng.reporters.JUnitReportReporter@12e5a8e所花费的时间：6毫秒
+
+===
+只是想知道这个问题已经解决了所有人，感谢你的帮助 - 
+我也在我的一台机器上得到同样的错误 - 
+但是相同的代码和相同的Firefox浏览器在其他机器上工作
+
+硒 3.4
+Firefox 56.1
+壁虎司机 0.19
+
+报错信息：
+org.apache.http.conn.HttpHostConnectException: 
+Connect to localhost:4124 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: 
+Connection refused: connect
+
+构建信息：版本：'未知'，修订版：'未知'，时间：'未知'
+系统信息：
+主机：'IBMT450PC062YD0'，
+ip：'10 .26.87.45'，
+os.name：'Windows 7'，
+os.arch：'x86'，
+os.version：'6.1'，
+java.version：'1.8.0_60“
+驱动程序信息：driver.version：Project_Master_Driverorg.apache.http.conn.HttpHostConnectException：
+连接到localhost：4124 [localhost / 127.0.0.1，localhost / 0：0：0：0：0：0：0：1]
+失败：连接拒绝：连接
+构建信息：版本：'未知'，修订版：'未知'，时间：'未知'
+
+===
+一旦我降级了FF，Selenium Standalone驱动程序，这个问题就解决了。
+我发现问题是因为Selenium Standalone Server 3仅在64位Windows中受支持。
+
+===
+我遇到了类似的问题，在64位Windows 10上运行最新版本的64位firefox和geckodriver。
+更新：
+  傻瓜如我，让我的“壁虎驱动程序”不知怎得以某种方式指向另一个文件。
+
+===
+尝试调用IE浏览器时出现以下错误
+IE Explorer是11.0
+IE驱动程序是3.11
+Sel版本是3.11
+请帮忙，可能是什么原因。
+
+启动InternetExplorerDriver服务器（64位）
+3.11.1.0
+监听3159端口 仅允许本地连接线程
+“main”中的异常org.openqa.selenium.WebDriverException：java.net.ConnectException：
+无法连接到localhost / 0：0：0：0：0：0：0：1：3159
+构建信息：版本：'3.11.0'，修订版：'e59cfb3'，时间：'2018-03-11T20：33：08.638Z'
+系统信息：主机：'INDA203920'，ip：'10 .164.47.61'，os.name：'Windows 7'，os.arch：'amd64'，os.version：'6.1'，java.version：'1.8.0_161“
+驱动程序信息：
+  driver.version：InternetExplorerDriver在org.openqa.selenium.remote.service.DriverCommandExecutor.execute（DriverCommandExecutor.java:92）
+  在org.openqa.selenium.remote.RemoteWebDriver.execute（RemoteWebDriver.java:545）
+  
+===
+对我来说，这是一个编程错误。
+我有一个BrowserFactory类，它在测试执行中维护一个“驱动程序”对象。
+我确保当我撕下浏览器时，我也将驱动程序对象排除在外。
+
+
+this seems a fun talk, though
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
